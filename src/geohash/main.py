@@ -14,7 +14,7 @@ def main(precision: int = 10) -> None:
     lat_lower_bound, lat_upper_bound = -90, 90
     long_lower_bound, long_upper_bound = -180, 180
     lat_encoding, long_encoding = [], []
-    for i in range(precision):
+    for _ in range(precision):
         lat_mid = (lat_lower_bound + lat_upper_bound) / 2
         long_mid = (long_lower_bound + long_upper_bound) / 2
         if user_lat >= lat_mid:
@@ -29,9 +29,12 @@ def main(precision: int = 10) -> None:
         else:
             long_encoding.append(0)
             long_upper_bound = long_mid
-    alternating_encoding = [item for pair in zip(lat_encoding, long_encoding) for item in pair]
-    geohash_binary = int("".join(str(bit) for bit in alternating_encoding), 2)
-    geohash = base32(geohash_binary)
+    alternating_encoding = [item for pair in zip(long_encoding, lat_encoding) for item in pair]
+    built_chunks = [alternating_encoding[i:i+5] for i in range(0, len(alternating_encoding), 5)]
+    connected_chunks = ["".join(map(str, chunk)) for chunk in built_chunks]
+    geohash_binary_as_decimal = [int(chunk, 2) for chunk in connected_chunks]
+    geohash_base32 = "".join(map(base32, geohash_binary_as_decimal))
+    print(geohash_base32)
     
 
 if __name__ == '__main__':
